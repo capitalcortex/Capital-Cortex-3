@@ -1,0 +1,40 @@
+stages:
+  - deploy
+deploy_CC_FE_dev:
+  stage: deploy
+  tags:
+    - cc-dev
+  script:
+    - docker stop cc-fe-dev-c && docker rm cc-fe-dev-c
+    - docker build . -t cc-fe-dev
+    - docker run -d --name cc-fe-dev-c -p 5003:3000 cc-fe-dev
+  only:
+    - development
+
+
+deploy_CC_FE_Staging:
+  stage: deploy
+  tags:
+    - cc-dev
+  script:
+    - sed -i "s/build:dev/build:stag/g" Dockerfile
+    - sed -i "s/start:dev/start:stag/g" Dockerfile
+    - docker stop cc-fe-stag-c && docker rm cc-fe-stag-c
+    - docker build . -t cc-fe-stag
+    - docker run -d --name cc-fe-stag-c -p 5050:3000 cc-fe-stag
+  only:
+    - staging
+
+
+deploy_CC_FE_Prod:
+  stage: deploy
+  tags:
+    - cc-prod
+  script:
+    - sed -i "s/build:dev/build:prod/g" Dockerfile
+    - sed -i "s/start:dev/start:prod/g" Dockerfile
+    - docker stop cc-fe-prod-c && docker rm cc-fe-prod-c
+    - docker build . -t cc-fe-prod
+    - docker run -d --name cc-fe-prod-c -p 5004:3000 cc-fe-prod
+  only:
+    - production

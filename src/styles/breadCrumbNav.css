@@ -1,0 +1,12 @@
+.breadcrumb ul{
+    @apply flex gap-2 mb-8;
+}
+.breadcrumb ul li a{
+    @apply text-theme-gray-300;
+}
+.breadcrumb ul li:not(:nth-child(1)){
+    @apply before:content-["/"] before:pr-1;
+}
+.breadcrumb ul li a.active{
+    @apply text-theme-gray-575 font-semibold;
+}

@@ -1,0 +1,7 @@
+{
+  "name": "capital-cortex",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}
