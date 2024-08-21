@@ -2,7 +2,24 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { authBaseService } from "./endpoints"; // Import your authService
 import { HttpService } from "../index";
 import ls from "localstorage-slim";
-
+interface SigninAuthData {
+  email: string;
+  password: string;
+}
+interface SignupAuthData {
+  fullname: string;
+  email: string;
+  password: string;
+  conditions: boolean;
+}
+interface SocialSignInData {
+  account: "google" | "linkedin";
+  access_token: string;
+  url?: string;
+}
+interface ErrorResponse {
+  message: string;
+}
 export const userAuthAsync = createAsyncThunk(
   "/auth",
   async (data, { rejectWithValue }) => {
@@ -17,31 +34,31 @@ export const userAuthAsync = createAsyncThunk(
   }
 );
 
-export const userSignUpAsync = createAsyncThunk(
+export const userSignUpAsync = createAsyncThunk<any, SignupAuthData, { rejectValue: ErrorResponse }>(
   "/auth/sign-Up",
   async (data, { rejectWithValue }) => {
     try {
       const response = await authBaseService.signUp(data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue({ message: error.response.data.message || "An error occurred" });
     }
   }
 );
 
-export const userSignInAsync = createAsyncThunk(
+export const userSignInAsync = createAsyncThunk<any, SigninAuthData, { rejectValue: ErrorResponse }>(
   "/auth/sign-in",
   async (data, { rejectWithValue }) => {
     try {
       const response = await authBaseService.signIn(data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue({ message: error.response.data.message || "An error occurred" });
     }
   }
 );
 
-export const socialSignInAsync = createAsyncThunk(
+export const socialSignInAsync = createAsyncThunk<any, SocialSignInData>(
   "auth/social-sign-in",
   async (data, { rejectWithValue }) => {
     try {

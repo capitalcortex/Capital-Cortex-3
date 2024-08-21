@@ -28,13 +28,13 @@ const EditProfileForm = () => {
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
-      fullname: profile?.fullname,
+      fullname: profile?.fullname || "",
       only_avatar: false,
-      role: profile?.role,
-      country: profile?.country,
-      sector: profile?.sector,
-      objective: profile?.objective,
-      bio: profile?.bio,
+      role: profile?.role || "",
+      country: profile?.country || "",
+      sector: profile?.sector || [],
+      objective: profile?.objective || "",
+      bio: profile?.bio || "",
     },
     validationSchema: EditProfileSchema,
     onSubmit: (values, { setSubmitting }) => {
@@ -42,6 +42,7 @@ const EditProfileForm = () => {
       dispatch(userEditProfileAsync(values));
       setSubmitting(false);
     },
+    enableReinitialize: true,
   });
 
   useEffect(() => {
@@ -49,14 +50,12 @@ const EditProfileForm = () => {
       preview: "",
       file: {},
     });
-    if (newURL != "") {
+    if (newURL !== "") {
       setAvatar(newURL);
       setNewURL("");
     }
-    setTimeout(() => {
-      formik.resetForm();
-    }, 1000);
-  }, [profile]);
+    
+  }, [profile, newURL]);
 
   const [fileImg, setFileImg] = useState<any>({
     preview: "",
@@ -92,12 +91,9 @@ const EditProfileForm = () => {
   const handleUpload = async () => {
     //@ts-ignore
     dispatch(setLoading(true));
-
     if (profile?.avatar != "") await azureStorage.deleteFile(profile?.avatar);
-
     let file_url = await azureStorage.uploadFile(fileImg.file);
     setNewURL(file_url);
-
     dispatch(
       //@ts-ignore
       userEditProfileAsync({
@@ -292,7 +288,7 @@ const EditProfileForm = () => {
             </Button>
             <Button
               disabled={isLoading || !formik.dirty}
-              onClick={() => formik.handleSubmit}
+              onClick={formik.handleSubmit}
               type="submit"
               className="w-50 font-bold rounded-lg"
               size="large"

@@ -24,29 +24,35 @@ const PreferenceTab = () => {
   const { profile } = useSelector((state: any) => state.user.profile);
   const { isLoading, metaData } = useSelector((state: any) => state.user);
   const dispatch = useDispatch();
+  const [error, setError] = useState<string | null>(null)
   const formik = useFormik({
     initialValues: {
-      title: profile?.title ? profile?.title : "",
-      org: profile?.org ? profile?.org : "",
-      years_exp: profile?.years_exp ? profile?.years_exp : "",
-      area_interest: profile?.area_interest ? profile?.area_interest : [],
-      legislation: profile?.legislation ? profile?.legislation : [],
-      bio: profile?.bio ? profile?.bio : "",
-      campaign_type: profile?.campaign_type ? profile?.campaign_type : [],
-      strategy_goal: profile?.strategy_goal ? profile?.strategy_goal : [],
-      region: profile?.region ? profile?.region : [],
-      stakeholders: profile?.stakeholders ? profile?.stakeholders : [],
-      com_channel: profile?.com_channel ? profile?.com_channel : [],
-      collab_initiatives: profile?.collab_initiatives
-        ? profile?.collab_initiatives
-        : false,
-      network: profile?.network ? profile?.network : [],
+      title: profile?.title || "",
+      org: profile?.org || "",
+      years_exp: profile?.years_exp || "",
+      area_interest: profile?.area_interest || [],
+      legislation: profile?.legislation || [],
+      bio: profile?.bio || "",
+      campaign_type: profile?.campaign_type || [],
+      strategy_goal: profile?.strategy_goal || [],
+      region: profile?.region || [],
+      stakeholders: profile?.stakeholders || [],
+      com_channel: profile?.com_channel || [],
+      collab_initiatives: profile?.collab_initiatives || false,
+      network: profile?.network || [],
     },
     validationSchema: ProfileSetupSchema,
     onSubmit: (values, { setSubmitting, resetForm }) => {
+     try {
       //@ts-ignore
       dispatch(userProfileSetupAsync(values));
+      setError(null)
+      resetForm();
+     } catch (error) {
+      console.log(error)
+     } finally {
       setSubmitting(false);
+     }
     },
   });
 

@@ -9,9 +9,29 @@ import { useRouter } from "next/router";
 import ArticlesCard from "../Cards/ArticlesCard/ArticlesCard";
 import { useDispatch, useSelector } from "react-redux";
 import { canadianBillsAsync, canadianReportsAsync } from "@/services/user/aysncThunk";
+import { AppDispatch } from "@/redux/store";
+import SwiperComponent from "../Cards/AletrtsBillsCard/SwiperComponent";
 
+type Tab = {
+    name: string;
+    current: boolean;
+  };
+  type Bill = {
+    id: string;
+    title: string;
+  };
+  
+  type Report = {
+    id: string;
+    summary: string;
+  };
+  
+  type AlertTabsProps = {
+    selectedTabIdx: number;
+    setSelectedTabIdx: (index: number) => void;
+  };
 
-const tabs: any[] = [
+const tabs: Tab[] = [
     { name: "Legislation", current: false },
     { name: "Census Reports", current: true },
     { name: "Announcement", current: true },
@@ -20,24 +40,20 @@ const tabs: any[] = [
 const filters: any[] = []
 const AlertTabs = ({selectedTabIdx, setSelectedTabIdx}: any) => {
     const router = useRouter()
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<AppDispatch>()
     const { bills, reports } = useSelector((state: any) => state.user);
 
     useEffect(() => {
-        //@ts-ignore
         dispatch(canadianBillsAsync({page: 0, offset: 0}))
-
-        //@ts-ignore
         dispatch(canadianReportsAsync({page: 0, offset: 0}))
-    }, [])
+    }, [dispatch])
 
 
     return (
         <div className="">
             <nav
                 className=" flex bg-theme-gray-100 rounded-full items-center justify-between overflow-hidden mb-6 w-[500px]"
-                aria-label="Tabs"
-            >
+                aria-label="Tabs">
                 {tabs.map((tab, i) => (
                     <a
                         key={tab.name}
@@ -61,36 +77,14 @@ const AlertTabs = ({selectedTabIdx, setSelectedTabIdx}: any) => {
                         {filters.length > 0 && <p className="text-theme hover:underline font-semibold cursor-pointer">Clear all filters</p>}
                     </ul>}
                     <div className="alerts">
-                        {bills.map((ele: any, i:number) => (
-                            <AlertBillsCard bill={ele} key={i} />
+                        {bills.map((bill:any) => (
+                            <AlertBillsCard key={bill._id} bill={bill} />
                         ))}
                     </div>
-                    <Swiper
-                        className="!block sm:!hidden mb-4"
-                        autoplay={true}
-                        speed={200}
-                        spaceBetween={24}
-                        modules={[Pagination]}
-                        pagination={{ clickable: true }}
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 1,
-                            },
-                            768: {
-                                slidesPerView: 2,
-                            },
-                            1024: {
-                                slidesPerView: 3,
-                            },
-                            1240: {
-                                slidesPerView: 4,
-                            },
-                        }}
-                    >
-                        {bills.map((ele: any, i:number) => (
-                            <SwiperSlide key={i}> <AlertBillsCard bill={ele} /> </SwiperSlide>
-                        ))}
-                    </Swiper>
+                    <SwiperComponent
+                        items={bills}
+                        renderItem={(bill: any) => <AlertBillsCard key={bill._id} bill={bill} />}
+                    />
                 </>
             )}
             {selectedTabIdx === 1 && reports.length > 0 &&  (
@@ -108,35 +102,10 @@ const AlertTabs = ({selectedTabIdx, setSelectedTabIdx}: any) => {
                             <AlertCard key={i} report={report} />
                         ))}
                     </div>
-                    <Swiper
-                        className="!block sm:!hidden mb-4"
-                        autoplay={true}
-                        speed={200}
-                        spaceBetween={24}
-                        modules={[Pagination]}
-                        pagination={{ clickable: true }}
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 1,
-                            },
-                            768: {
-                                slidesPerView: 2,
-                            },
-                            1024: {
-                                slidesPerView: 3,
-                            },
-                            1240: {
-                                slidesPerView: 4,
-                            },
-                        }}
-                    >
-                        {reports.map((report: any, i: number) => (
-                            <SwiperSlide key={i}>
-                                <AlertCard report={report} />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-
+                    <SwiperComponent
+                        items={reports}
+                        renderItem={(report: any) => <AlertCard key={report.id} report={report} />}
+                    />
                 </>
             )}
 
@@ -155,35 +124,10 @@ const AlertTabs = ({selectedTabIdx, setSelectedTabIdx}: any) => {
                             <ArticlesCard key={i} article={i} />
                         ))}
                     </div>
-                    <Swiper
-                        className="!block sm:!hidden mb-4"
-                        autoplay={true}
-                        speed={200}
-                        spaceBetween={24}
-                        modules={[Pagination]}
-                        pagination={{ clickable: true }}
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 1,
-                            },
-                            768: {
-                                slidesPerView: 2,
-                            },
-                            1024: {
-                                slidesPerView: 3,
-                            },
-                            1240: {
-                                slidesPerView: 4,
-                            },
-                        }}
-                    >
-                        {[0, 1, 2, 3, 4, 5].map((ele, i) => (
-                            <SwiperSlide key={i}>
-                                <ArticlesCard article={i} />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-
+                    <SwiperComponent
+                        items={[0, 1, 2, 3, 4, 5]}
+                        renderItem={(i: number) => <ArticlesCard key={i} article={i} />}
+                    />
                 </>
             )}
         </div>

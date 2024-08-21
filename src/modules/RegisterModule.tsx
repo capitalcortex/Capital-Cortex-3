@@ -5,7 +5,6 @@ import { GoogleIcon, LinkedinIcon } from "@/components/Icons";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect } from "react";
-import { AutoFocusOnFirstInput } from "@/components/Microservices/microservices";
 import NiceModal from "@ebay/nice-modal-react";
 import SuccessModal from "@/components/Modals/SuccessModal/SuccessModal";
 import { useFormik } from "formik";
@@ -17,9 +16,15 @@ import { useRouter } from "next/router";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useLinkedIn } from "react-linkedin-login-oauth2";
 import Toast from "@/components/Toast";
-
+import { AppDispatch } from "@/redux/store";
+interface FormValues {
+  fullname: string,
+  email: string,
+  password: string,
+  conditions: boolean,
+}
 const RegisterModule = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { isLoading, signUpSuccess } = useSelector((state: any) => state.user);
   const router = useRouter();
   const ShowModal = () => {
@@ -30,7 +35,7 @@ const RegisterModule = () => {
     });
   };
 
-  const formik = useFormik({
+  const formik = useFormik<FormValues>({
     initialValues: {
       fullname: "",
       email: "",
@@ -40,11 +45,11 @@ const RegisterModule = () => {
     validationSchema: SignupSchema,
     onSubmit: (values, { setSubmitting }) => {
       dispatch(
-        //@ts-ignore
         userSignUpAsync({
           fullname: values.fullname,
           email: values.email,
           password: values.password,
+          conditions: values.conditions,
         })
       );
       setSubmitting(false);
@@ -60,25 +65,24 @@ const RegisterModule = () => {
     }
   }, [signUpSuccess]);
 
-  useEffect(() => {
-    AutoFocusOnFirstInput();
-  }, []);
+  const handleError = (message: string) => {
+    Toast.fire({
+      icon: "error",
+      title: message,
+    })
+}
 
   const googleAuthenticationHandler = useGoogleLogin({
     onSuccess: (res) => {
       dispatch(
-        // @ts-ignore
         socialSignInAsync({
           account: "google",
-          access_token: `${res?.access_token}`,
+          access_token: res?.access_token || "",
         })
       );
     },
     onError: (error) => {
-      Toast.fire({
-        icon: "error",
-        title: "Error while login",
-      });
+      handleError("Error while login");
     },
   });
 
@@ -88,21 +92,17 @@ const RegisterModule = () => {
     redirectUri: `${typeof window === "object" && window.location.origin
       }/linkedin`,
     onSuccess: (code) => {
+      const origin = typeof window === "object" ? window.location.origin : "";
       dispatch(
-        // @ts-ignore
         socialSignInAsync({
           account: "linkedin",
           access_token: code,
-          url: `${typeof window === "object" && window.location.origin
-            }/linkedin`
+          url: `${origin}/linkedin`
         })
       );
     },
     onError: (error) => {
-      Toast.fire({
-        icon: "error",
-        title: "Error while login",
-      });
+      handleError("Error while login");
     },
   });
 
@@ -115,6 +115,7 @@ const RegisterModule = () => {
           width={208}
           alt="capital cortex logo"
           aria-label="capital cortex company logo"
+          className="block lg:hidden mx-auto lg:mx-0"
         />
         {/* <text className="">
           {"Public Policy and Government Affairs AI Assistant"}
@@ -248,7 +249,9 @@ const RegisterModule = () => {
                 variant="black"
                 className="w-full rounded-lg mb-6"
               >
-                Sign Up
+                {
+                  isLoading ? (<span className="ml-2">Loading ...</span>) : ('Sign Up')
+                }
               </Button>
               <p className="text-white lg:text-theme-gray-400 font-normal text-center">
                 Already have an account?&nbsp;
