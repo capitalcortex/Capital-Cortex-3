@@ -176,12 +176,14 @@ const EditProfileForm = () => {
           </div>
           <fieldset className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-6">
             <Input
+              id="FullName"
               formik={formik}
               value={formik.values.fullname}
               name="fullname"
               placeholder="Full Name"
             />
             <Input
+              id="Email"
               disabled={true}
               name="email"
               value={profile?.email}

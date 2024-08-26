@@ -173,16 +173,18 @@ const LoginModule = () => {
             </p>
             <form onSubmit={formik.handleSubmit} className="w-full">
               <Input
+                id="Email*"
                 aria-label="Email input"
-                placeholder="Email"
+                placeholder="Enter your email"
                 formik={formik}
                 type="email"
                 name="email"
                 parentClass="mb-6"
               />
               <Input
+                id="Password*"
                 aria-label="Password input"
-                placeholder="Password"
+                placeholder="Create a Password"
                 formik={formik}
                 type="password"
                 parentClass="mb-6"

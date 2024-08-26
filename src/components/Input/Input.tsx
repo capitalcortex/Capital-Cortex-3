@@ -71,6 +71,12 @@ const Input = ({
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className={`relative ${parentClass || ""}`}>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium leading-6 text-white lg:text-gray-900 mb-1"
+      >
+        {id}
+      </label>
       <input
         aria-label={ariaLabel ? ariaLabel : "input"}
         spellCheck="false"
@@ -83,7 +89,7 @@ const Input = ({
               : type
             : "text"
         }
-        // id={id ? id : "theme-input"}
+        id={id}
         name={name}
         pattern={pattern}
         max={max}
@@ -93,26 +99,23 @@ const Input = ({
         value={formik ? formik.values[name] : value}
         prefix={prefix ? prefix : ""}
         disabled={disabled}
-        placeholder=" "
+        placeholder={placeholder}
         maxLength={maxLength}
-        className={`theme-input peer ${className}`}
+        className={`block w-full rounded-md border py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 sm:text-sm sm:leading-6 pl-3`}
         onBlur={formik?.handleBlur}
         onInput={formik?.handleBlur}
         onChange={formik ? formik?.handleChange : onChange}
         {...rest}
       />
-      <label htmlFor={id} className="theme-input-label">
-        {placeholder}
-      </label>
       {type === "password" &&
         (showPassword ? (
           <EyeCloseIcon
-            className="h-5 w-5 absolute top-5 -translate-y-1/2 right-2 text-gray-500 cursor-pointer transition-all"
+            className="h-5 w-5 absolute top-8 -translate-y-1/2 right-2 text-gray-500 cursor-pointer transition-all"
             onClick={() => setShowPassword(!showPassword)}
           />
         ) : (
           <EyeOpenIcon
-            className="h-5 w-5 absolute top-5 -translate-y-1/2 right-2 text-gray-500 cursor-pointer transition-all"
+            className="h-5 w-5 absolute top-8 -translate-y-1/2 right-2 text-gray-500 cursor-pointer transition-all"
             onClick={() => setShowPassword(!showPassword)}
           />
         ))}

@@ -183,24 +183,27 @@ const RegisterModule = () => {
             </p>
             <form onSubmit={formik.handleSubmit}>
               <Input
+                id="Full Name*"
                 aria-label="Fullname input"
-                placeholder="Full Name"
+                placeholder="Enter your name"
                 formik={formik}
                 type="text"
                 name="fullname"
                 parentClass="mb-6"
               />
               <Input
+                id="Email*"
                 aria-label="Email input"
-                placeholder="Email"
+                placeholder="Enter Your Email"
                 formik={formik}
                 parentClass="mb-6"
                 type="email"
                 name="email"
               />
               <Input
+                id="Password*"
                 aria-label="Password input"
-                placeholder="Password"
+                placeholder="Create a Password"
                 parentClass="mb-6"
                 formik={formik}
                 type="password"
