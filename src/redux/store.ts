@@ -14,3 +14,4 @@ export const store = configureStore({
     stakeholder: stakeholderReducer
   },
 });
+export type AppDispatch = typeof store.dispatch;

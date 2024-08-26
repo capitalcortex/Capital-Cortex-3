@@ -123,8 +123,7 @@ const CreateNewDocumentModal = NiceModal.create(({ ...props }: any) => {
           {activeStep === 1 ? (
             <div className="p-4 sm:p-8">
               <h2 className="h1 sm:leading-1 font-semibold text-2xl">
-                {activeStep}. What type of document would you like Capital
-                Cortex to generate?
+                {activeStep}. Choose the type of document you would like Capital Cortex to create for you?
               </h2>
               <p className="mt-2 text-theme-gray-325 sm:pl-5">
                 Choose the type of document you would like Capital Cortex to

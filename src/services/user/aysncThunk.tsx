@@ -3,7 +3,18 @@ import { userBaseService } from "./endpoints"; // Import your authService
 import { HttpService } from "../index";
 import ls from "localstorage-slim";
 import { authBaseService } from "../auth/endpoints";
-
+interface Bill {
+  id: string;
+  title: string;
+}
+export interface Report {
+  id: string;
+  summary: string;
+}
+export interface RequestParams {
+  page: number;
+  offset: number;
+}
 export const userProfileSetupAsync = createAsyncThunk(
   "/user/profile-setup",
   async (data, { rejectWithValue }) => {
@@ -111,26 +122,26 @@ export const newsAlertAsync = createAsyncThunk(
   }
 );
 
-export const canadianBillsAsync = createAsyncThunk(
+export const canadianBillsAsync = createAsyncThunk<Bill[], RequestParams, { rejectValue: string }>(
   "/canadian-bills",
   async (data, { rejectWithValue }) => {
     try {
       const response = await userBaseService.canadianBills(data);
       return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'An error occurred');
     }
   }
 );
 
-export const canadianReportsAsync = createAsyncThunk(
+export const canadianReportsAsync = createAsyncThunk< Report[], RequestParams, { rejectValue: string } >(
   "/canadian-reports",
   async (data, { rejectWithValue }) => {
     try {
       const response = await userBaseService.canadianReports(data);
       return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response.data.message || 'An error occurred');
     }
   }
 );

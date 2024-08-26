@@ -148,7 +148,7 @@ function PolicyBriefSteps({
             {
               //@ts-ignore
               FormData?.doc_type == "Policy Brief"
-                ? "Please write details about the issue on which the document should be created"
+                ? "Please provide details about the policy area you'd like a briefing on"
                 : "Please write details about what you want to do in document"
             }
           </p>

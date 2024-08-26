@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import { UpdatePasswordSchema } from "@/services/schema.service";
 import { useDispatch, useSelector } from "react-redux";
 import { userChangePasswordAsync } from "@/services/user/aysncThunk";
+import { ImSpinner9 } from "react-icons/im";
 const PasswordTab = () => {
   const dispatch = useDispatch();
   const formik = useFormik({
@@ -14,10 +15,16 @@ const PasswordTab = () => {
     },
     validationSchema: UpdatePasswordSchema,
     onSubmit: (values, { setSubmitting, resetForm }) => {
-      // @ts-ignore
-      dispatch(userChangePasswordAsync(values));
-      setSubmitting(false);
-      resetForm();
+      try {
+        // @ts-ignore
+        dispatch(userChangePasswordAsync(values));
+        resetForm();
+      } catch (error) {
+        console.log('Password Field Error',error)
+      } finally {
+        setSubmitting(false);
+      }
+      
     },
   });
 
@@ -54,13 +61,17 @@ const PasswordTab = () => {
           Cancel
         </Button>
         <Button
-          disabled={!formik.dirty}
+          disabled={!formik.dirty || formik.isSubmitting}
           type="submit"
           className="w-50 font-bold rounded-lg"
           size="large"
           variant="black"
         >
-          Update Password
+          {
+            formik.isSubmitting ? (<span className="absolute inset-0 flex justify-center items-center">
+              <ImSpinner9 className="text-white text-xl animate-spin" />
+            </span>) : ('Update Password')
+          }
         </Button>
       </div>
     </form>

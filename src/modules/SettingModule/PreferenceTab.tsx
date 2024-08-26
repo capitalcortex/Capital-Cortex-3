@@ -24,29 +24,37 @@ const PreferenceTab = () => {
   const { profile } = useSelector((state: any) => state.user.profile);
   const { isLoading, metaData } = useSelector((state: any) => state.user);
   const dispatch = useDispatch();
+  const [error, setError] = useState<string | null>(null)
   const formik = useFormik({
     initialValues: {
-      title: profile?.title ? profile?.title : "",
-      org: profile?.org ? profile?.org : "",
-      years_exp: profile?.years_exp ? profile?.years_exp : "",
-      area_interest: profile?.area_interest ? profile?.area_interest : [],
-      legislation: profile?.legislation ? profile?.legislation : [],
-      bio: profile?.bio ? profile?.bio : "",
-      campaign_type: profile?.campaign_type ? profile?.campaign_type : [],
-      strategy_goal: profile?.strategy_goal ? profile?.strategy_goal : [],
-      region: profile?.region ? profile?.region : [],
-      stakeholders: profile?.stakeholders ? profile?.stakeholders : [],
-      com_channel: profile?.com_channel ? profile?.com_channel : [],
-      collab_initiatives: profile?.collab_initiatives
-        ? profile?.collab_initiatives
-        : false,
-      network: profile?.network ? profile?.network : [],
+      title: profile?.title || "",
+      org: profile?.org || "",
+      years_exp: profile?.years_exp || "",
+      area_interest: profile?.area_interest || [],
+      legislation: profile?.legislation || [],
+      bio: profile?.bio || "",
+      campaign_type: profile?.campaign_type || [],
+      strategy_goal: profile?.strategy_goal || [],
+      region: profile?.region || [],
+      stakeholders: profile?.stakeholders || [],
+      com_channel: profile?.com_channel || [],
+      collab_initiatives: profile?.collab_initiatives || false,
+      network: profile?.network || [],
+      interest_collab_network: profile?.interest_collab_network || "No",
+      interest_dev_platform: profile?.interest_dev_platform || "No",
     },
     validationSchema: ProfileSetupSchema,
     onSubmit: (values, { setSubmitting, resetForm }) => {
+     try {
       //@ts-ignore
       dispatch(userProfileSetupAsync(values));
+      setError(null)
+      resetForm();
+     } catch (error) {
+      console.log(error)
+     } finally {
       setSubmitting(false);
+     }
     },
   });
 
@@ -130,6 +138,93 @@ const PreferenceTab = () => {
                     return { value: x, label: x };
                   })}
                 />
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-4">
+                  <div className="flex flex-col">
+                    <div className="relative">
+                      <MultiSelect
+                        instanceId="interest_collab_network"
+                        name="interest_collab_network"
+                        placeholder="Select..."
+                        formik={formik}
+                        values={[
+                          { value: "Yes", label: "Yes" },
+                          { value: "No", label: "No" },
+                        ]}
+                        value={[
+                          {
+                            value: formik.values.interest_collab_network,
+                            label:
+                              formik.values.interest_collab_network === "Yes"
+                                ? "Yes"
+                                : "No",
+                          },
+                        ]}
+                      />
+                      <span className="absolute inset-y-0 right-0 flex items-center pr-2 group">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-5 h-5 text-gray-400 cursor-pointer"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v2.25m0 3.75h.008v.008H12v-.008zm8.485-3.003a9 9 0 11-16.97 0 9 9 0 0116.97 0z"
+                          />
+                        </svg>
+                        <div className="hidden group-hover:block z-10 bg-gray-500 text-white text-xs rounded py-1 px-2 bottom-full mb-1">
+                          Interest in Collaboration or Networking
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <div className="relative">
+                      <MultiSelect
+                        instanceId="interest_dev_platform"
+                        name="interest_dev_platform"
+                        placeholder="Select..."
+                        formik={formik}
+                        values={[
+                          { value: "Yes", label: "Yes" },
+                          { value: "No", label: "No" },
+                        ]}
+                        value={[
+                          {
+                            value: formik.values.interest_dev_platform,
+                            label:
+                              formik.values.interest_dev_platform === "Yes"
+                                ? "Yes"
+                                : "No",
+                          },
+                        ]}
+                      />
+                      <span className="absolute inset-y-0 right-0 flex items-center pr-2 group">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-5 h-5 text-gray-400 cursor-pointer"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v2.25m0 3.75h.008v.008H12v-.008zm8.485-3.003a9 9 0 11-16.97 0 9 9 0 0116.97 0z"
+                          />
+                        </svg>
+                        <div className="hidden group-hover:block z-10 bg-gray-500 text-white text-xs rounded py-1 px-2 bottom-full mb-1">
+                          Interest in Helping the CC Team Develop the Platform
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <Textarea
                   name="bio"
                   value={formik.values.bio}

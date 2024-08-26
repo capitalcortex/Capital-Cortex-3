@@ -5,7 +5,6 @@ import { GoogleIcon, LinkedinIcon } from "@/components/Icons";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { AutoFocusOnFirstInput } from "@/components/Microservices/microservices";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { userSignInAsync, socialSignInAsync } from "@/services/auth/asyncThunk";
@@ -14,16 +13,21 @@ import { LoginSchema } from "@/services/schema.service";
 import { useGoogleLogin } from '@react-oauth/google';
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
 import Toast from "@/components/Toast";
+import { AppDispatch } from "@/redux/store";
+interface RememberObject {
+  email: string;
+  remember: boolean;
+}
+interface FormValues {
+  email: string;
+  password: string;
+}
 const LoginModule = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [remember, setRemember] = useState(false);
   const { isLoading } = useSelector((state: any) => state.user);
 
-  useEffect(() => {
-    AutoFocusOnFirstInput();
-  }, []);
-
-  const formik = useFormik({
+  const formik = useFormik<FormValues>({
     initialValues: {
       email: "",
       password: "",
@@ -33,7 +37,6 @@ const LoginModule = () => {
       if (remember) {
         handleRemember(values?.email);
       }
-      //@ts-ignore
       await dispatch(userSignInAsync(values));
       setSubmitting(false);
     },
@@ -50,31 +53,31 @@ const LoginModule = () => {
   };
 
   useEffect(() => {
-    const rememberObj = ls.get("remember", { decrypt: true });
-    //@ts-ignore
-    if (rememberObj !== "null" || rememberObj?.remember) {
-      //@ts-ignore
+    const rememberObj = ls.get("remember", { decrypt: true }) as RememberObject | null;
+    if (rememberObj && rememberObj?.remember) {
       formik.setFieldValue("email", rememberObj?.email);
-      //@ts-ignore
       setRemember(rememberObj?.remember);
     }
   }, []);
 
+  const handleError = (message: string) => {
+      Toast.fire({
+        icon: "error",
+        title: message,
+      })
+  }
+
   const googleAuthenticationHandler = useGoogleLogin({
     onSuccess: (res) => {
       dispatch(
-        // @ts-ignore
         socialSignInAsync({
           account: "google",
-          access_token: `${res?.access_token}`,
+          access_token: res?.access_token || "",
         })
       );
     },
     onError: (error) => {
-      Toast.fire({
-        icon: "error",
-        title: "Error while login",
-      });
+      handleError("Error while login");
     },
   });
 
@@ -84,21 +87,17 @@ const LoginModule = () => {
     redirectUri: `${typeof window === "object" && window.location.origin
       }/linkedin`,
     onSuccess: (code) => {
+      const origin = typeof window === "object" ? window.location.origin : "";
       dispatch(
-        // @ts-ignore
         socialSignInAsync({
           account: "linkedin",
           access_token: code,
-          url: `${typeof window === "object" && window.location.origin
-            }/linkedin`
+          url: `${origin}/linkedin`
         })
       );
     },
     onError: (error) => {
-      Toast.fire({
-        icon: "error",
-        title: "Error while login",
-      });
+      handleError("Error while login");
     },
   });
 
@@ -112,6 +111,7 @@ const LoginModule = () => {
           width={208}
           alt="capital cortex logo"
           aria-label="capital cortex company logo"
+          className="block lg:hidden mx-auto lg:mx-0"
         />
         {/* <text className="">
           {"Public Policy and Government Affairs AI Assistant"}
@@ -173,16 +173,18 @@ const LoginModule = () => {
             </p>
             <form onSubmit={formik.handleSubmit} className="w-full">
               <Input
+                id="Email*"
                 aria-label="Email input"
-                placeholder="Email"
+                placeholder="Enter your email"
                 formik={formik}
                 type="email"
                 name="email"
                 parentClass="mb-6"
               />
               <Input
+                id="Password*"
                 aria-label="Password input"
-                placeholder="Password"
+                placeholder="Create a Password"
                 formik={formik}
                 type="password"
                 parentClass="mb-6"
@@ -216,7 +218,7 @@ const LoginModule = () => {
                 disabled={isLoading}
                 variant="black"
               >
-                Login
+                {isLoading ? (<span className="ml-2">Logging in...</span>) : ('Login')}
               </Button>
               <p className="text-theme-gray-50 lg:text-theme-gray-400 font-normal text-center">
                 Don’t have an account?&nbsp;

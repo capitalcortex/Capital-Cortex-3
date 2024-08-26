@@ -13,20 +13,20 @@ import { setStakeholderDetails } from "@/redux/slices/stakeholderSlice";
 import { deleteStakeholderAsync } from "@/services/stakeholder/asyncThunk";
 
 interface Iprops {
-  key?: any
-  isOpen?:boolean,
-  setIsOpen?:any,
+  index?: number;
+  isOpen?: (isOpen: boolean) => void;
+  setIsOpen?:any;
   isDetailOpen?:boolean,
-  setIsDetailOpen?:any,
-  stakeholder?:any,
-  setType?:any
+  setIsDetailOpen?: (isDetailOpen: boolean) => void;
+  stakeholder?:any;
+  setType?: (type: string) => void;
 }
 
-const StakeholderCard = ({ key, setIsOpen, setIsDetailOpen, stakeholder, setType }: Iprops) => {
+const StakeholderCard = ({ index, setIsOpen, setIsDetailOpen, stakeholder, setType }: Iprops) => {
   const dispatch = useDispatch()
 
   return (
-    <li key={key} className="stakeholder">
+    <li key={index} className="stakeholder">
       <div className="p-4 flex items-start w-full justify-between">
         <div className="flex items-start gap-4 w-full">
           {
@@ -74,8 +74,8 @@ const StakeholderCard = ({ key, setIsOpen, setIsDetailOpen, stakeholder, setType
               <Button className="flex gap-2 !min-w-max !justify-start !p-0" onClick={() => {
                 //@ts-ignore
                 dispatch(setStakeholderDetails(stakeholder))
-                setIsOpen(true)
-                setType('Edit')
+                setIsOpen?.(true)
+                setType?.('Edit')
               }}>
                 <EditIcon />
                 <span>Edit</span>
@@ -96,7 +96,7 @@ const StakeholderCard = ({ key, setIsOpen, setIsDetailOpen, stakeholder, setType
           onClick={() => {
             //@ts-ignore
             dispatch(setStakeholderDetails(stakeholder))  
-            setIsDetailOpen(true)
+            setIsDetailOpen?.(true)
           }}
           type="button"
           className="font-semibold !min-w-max leading-1 fs-16 !px-3"

@@ -5,59 +5,89 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { userUpdateAlertsAsync } from "@/services/user/aysncThunk";
 
+interface AlertSettings {
+  Sector: string[];
+  Category: string[];
+  City: string[];
+  Country: string[];
+}
+
+interface MetaData {
+  sectors: string[];
+  categories: string[];
+  countries: Record<string, string[]>;
+}
+
 const AlertsSettingTab = () => {
-  const { isLoading, profile, metaData } = useSelector((state: any) => state.user);
+  const { isLoading, profile, metaData } = useSelector((state: {
+    user: {
+      isLoading: boolean;
+      profile: { alerts: AlertSettings };
+      metaData: MetaData;
+    };
+  }) => state.user);
   const dispatch = useDispatch();
   const [change, setChange] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      Sector: profile?.alerts?.length === 0 ? [] : profile.alerts.Sector,
-      Category: profile?.alerts?.length === 0 ? [] : profile.alerts.Category,
-      City: profile?.alerts?.Country ? Object.values(profile.alerts.Country).flat() : [],
-      Country: profile?.alerts?.Country ? Object.keys(profile.alerts.Country) : [],
+      Sector: profile?.alerts?.Sector || [],
+      Category: profile?.alerts?.Category || [],
+      City: profile?.alerts?.Country
+        ? Object.values(profile.alerts.Country).flat()
+        : [],
+      Country: profile?.alerts?.Country
+        ? Object.keys(profile.alerts.Country)
+        : [],
     },
-    onSubmit: (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setChange(false);
-      let payload = {
-        alerts: [],
+      const payload = { alerts: [] as any[] };
+
+      const currentAlerts = profile?.alerts || {};
+
+      const getRemovedSubTypes = (
+        key: string,
+        oldSubTypes: string[],
+        newSubTypes: string[]
+      ) => {
+        return oldSubTypes.filter((subType) => !newSubTypes.includes(subType));
       };
 
-      const profileAlerts = profile?.alerts || {};
+      const currentCities = Object.values(currentAlerts.Country || {}).flat();
+      const removedCities = getRemovedSubTypes(
+        "City",
+        currentCities,
+        values.City
+      );
+      const currentCountries = Object.keys(currentAlerts.Country || {});
+      const removedCountries = getRemovedSubTypes(
+        "Country",
+        currentCountries,
+        values.Country
+      );
 
-      // Helper function to get removed subtypes
-      // @ts-ignore
-      const getRemovedSubTypes = (key, oldSubTypes, newSubTypes) => {
-        // @ts-ignore
-        return oldSubTypes ? oldSubTypes.filter(subType => !newSubTypes.includes(subType)) : [];
-      };
+      const alertTypes: Array<keyof AlertSettings> = ["Sector", "Category"];
 
-      // Determine removed cities and countries
-      const currentCities = Object.values(profileAlerts.Country || {}).flat();
-      const removedCities = getRemovedSubTypes("City", currentCities, values.City);
-      const currentCountries = Object.keys(profileAlerts.Country || {});
-      const removedCountries = getRemovedSubTypes("Country", currentCountries, values.Country);
-
-      // Construct the payload for sectors and categories
-      ["Sector", "Category"].forEach(key => {
-        // @ts-ignore
+      alertTypes.forEach((key) => {
         const newSubTypes = values[key] || [];
-        const removeSubTypes = getRemovedSubTypes(key, profileAlerts[key], newSubTypes);
+        const removedSubTypes = getRemovedSubTypes(
+          key,
+          currentAlerts[key] || [],
+          newSubTypes
+        );
 
-        if (newSubTypes.length > 0 || removeSubTypes.length > 0) {
-          // @ts-ignore
+        if (newSubTypes.length > 0 || removedSubTypes.length > 0) {
           payload.alerts.push({
             alertType: key,
             subTypes: newSubTypes,
-            removeSubTypes: removeSubTypes,
+            removeSubTypes: removedSubTypes,
           });
         }
       });
 
-      // Construct the payload for countries
       const newCountries = values.Country || [];
       if (newCountries.length > 0 || removedCountries.length > 0) {
-        // @ts-ignore
         payload.alerts.push({
           alertType: "Country",
           subTypes: newCountries,
@@ -65,19 +95,23 @@ const AlertsSettingTab = () => {
         });
       }
 
-      // Construct the payload for cities with country mapping
       const newCities = values.City || [];
-      const cityCountryMap = newCities.reduce((acc, city) => {
-        const country = metaData?.countries && Object.keys(metaData.countries).find(country => metaData.countries[country].includes(city));
-        if (country) {
-          // @ts-ignore
-          acc[city] = country;
-        }
-        return acc;
-      }, {});
+      const cityCountryMap = newCities.reduce(
+        (acc: Record<string, string>, city: string) => {
+          const country =
+            metaData?.countries &&
+            Object.keys(metaData.countries).find((country) =>
+              metaData.countries[country].includes(city)
+            );
+          if (country) {
+            acc[city] = country;
+          }
+          return acc;
+        },
+        {}
+      );
 
       if (newCities.length > 0 || removedCities.length > 0) {
-        // @ts-ignore
         payload.alerts.push({
           alertType: "City",
           subTypes: newCities,
@@ -85,14 +119,16 @@ const AlertsSettingTab = () => {
           cityCountryMap: cityCountryMap,
         });
       }
-
-
       // @ts-ignore
-      dispatch(userUpdateAlertsAsync(payload));
-      setSubmitting(false);
-    }
-
+      dispatch(userUpdateAlertsAsync(payload)).finally(() => {
+        setSubmitting(false);
+      });
+    },
   });
+  const handleSelectChange = (event: any) => {
+    formik.handleChange(event);
+    setChange(true);
+  };
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -121,6 +157,7 @@ const AlertsSettingTab = () => {
               </label>
             }
             placeholder="Select Sector"
+            onChange={handleSelectChange}
           />
         </div>
         <div className="border border-theme-gray-125 rounded-lg p-6">
@@ -143,6 +180,7 @@ const AlertsSettingTab = () => {
               </label>
             }
             placeholder="Select Category"
+            onChange={handleSelectChange}
           />
         </div>
         <div className="border border-theme-gray-125 rounded-lg p-6">
@@ -165,6 +203,7 @@ const AlertsSettingTab = () => {
               </label>
             }
             placeholder="Select Country"
+            onChange={handleSelectChange}
           />
         </div>
         <div className="border border-theme-gray-125 rounded-lg p-6">
@@ -195,6 +234,7 @@ const AlertsSettingTab = () => {
                 Select States/Province
               </label>
             }
+            onChange={handleSelectChange}
           />
         </div>
       </div>
@@ -217,9 +257,9 @@ const AlertsSettingTab = () => {
           className="w-50 font-bold rounded-lg"
           size="large"
           variant="black"
-          disabled={isLoading || !change}
+          disabled={isLoading || !change || formik.isSubmitting}
         >
-          Save Changes
+          {formik.isSubmitting ? "Saving ..." : "Save Changes"}
         </Button>
       </div>
     </form>
